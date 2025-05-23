@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIRILE XP</title>
+    <style>
+        /* Windows XP Theme */
+        body {
+            font-family: 'Tahoma', sans-serif;
+            background-color: #008080;
+            margin: 0;
+            padding: 0;
+            color: #000;
+            background-image: url('https://i.imgur.com/3QZQZ9q.png');
+            background-size: cover;
+        }
+        
+        .desktop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+        }
+        
+        .window {
+            position: absolute;
+            width: 600px;
+            background: #ece9d8;
+            border: 3px solid;
+            border-color: #fff #808080 #808080 #fff;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .title-bar {
+            background: linear-gradient(to right, #000080, #1084d0);
+            color: white;
+            padding: 4px 6px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .close-button {
+            background: #ece9d8;
+            border: 1px solid;
+            border-color: #fff #808080 #808080 #fff;
+            width: 18px;
+            height: 18px;
+            text-align: center;
+            line-height: 16px;
+            cursor: pointer;
+        }
+        
+        .content {
+            padding: 15px;
+        }
+        
+        .button {
+            background: #ece9d8;
+            border: 2px solid;
+            border-color: #fff #808080 #808080 #fff;
+            padding: 4px 12px;
+            cursor: pointer;
+            font-family: 'Tahoma';
+            font-size: 12px;
+        }
+        
+        .button:hover {
+            background: #e0e0e0;
+        }
+        
+        .button:active {
+            border-color: #808080 #fff #fff #808080;
+        }
+        
+        #image-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 15px auto;
+            border: 2px solid #808080;
+            background: white;
+        }
+        
+        #uploaded-image {
+            max-width: 100%;
+            max-height: 100%;
+            display: none;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background: #fff;
+            border: 2px solid #808080;
+            margin: 10px 0;
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background: #008080;
+            width: 0%;
+            transition: width 0.3s;
+            color: white;
+            text-align: center;
+            line-height: 20px;
+            font-size: 12px;
+        }
+        
+        .start-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: #ece9d8;
+            border-top: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            padding-left: 5px;
+        }
+        
+        .start-button {
+            background: linear-gradient(to right, #000080, #1084d0);
+            color: white;
+            padding: 2px 10px;
+            font-weight: bold;
+            border: 2px solid;
+            border-color: #fff #808080 #808080 #fff;
+            margin-right: 5px;
+        }
+        
+        .icon {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            margin: 5px;
+            text-align: center;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        
+        .desktop-icon {
+            position: absolute;
+            width: 80px;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .desktop-icon img {
+            width: 32px;
+            height: 32px;
+        }
+    </style>
+</head>
+<body>
+    <div class="desktop">
+        <!-- Desktop Icons -->
+        <div class="desktop-icon" style="top: 20px; left: 20px;">
+            <img src="https://i.imgur.com/3QZQZ9q.png" alt="My Computer">
+            <div>My Computer</div>
+        </div>
+        
+        <div class="desktop-icon" style="top: 80px; left: 20px;">
+            <img src="https://i.imgur.com/3QZQZ9q.png" alt="Recycle Bin">
+            <div>Recycle Bin</div>
+        </div>
+        
+        <!-- Main Window -->
+        <div class="window" id="main-window">
+            <div class="title-bar">
+                <div>VIRILE XP - Facial Analysis</div>
+                <div class="close-button">X</div>
+            </div>
+            <div class="content">
+                <h2 style="margin-top: 0;">VIRILE Facial Scan</h2>
+                <p>Upload your photo for analysis:</p>
+                
+                <input type="file" id="selfie-upload" accept="image/*" style="display: none;">
+                <button class="button" onclick="document.getElementById('selfie-upload').click()">Browse...</button>
+                
+                <div id="image-container">
+                    <img id="uploaded-image" alt="Uploaded preview">
+                    <canvas id="overlay"></canvas>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar">0%</div>
+                </div>
+                
+                <p id="status-text">Ready to scan</p>
+                
+                <button class="button" id="scan-button" disabled>Scan Face</button>
+                
+                <div id="results" style="display: none; margin-top: 15px; border-top: 1px solid #808080; padding-top: 10px;">
+                    <h3>Analysis Results:</h3>
+                    <div id="feature-scores"></div>
+                    <div id="recommendations"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Start Bar -->
+        <div class="start-bar">
+            <div class="start-button">Start</div>
+            <div style="flex-grow: 1;"></div>
+            <div style="padding-right: 5px;">12:34 PM</div>
+        </div>
+    </div>
+
+    <!-- Load Face-api.js from CDN -->
+    <script src="https://justadudewhohacks.github.io/face-api.js/face-api.js"></script>
+    <script>
+        // Preload models in background
+        let modelsLoaded = false;
+        
+        async function loadModels() {
+            if (modelsLoaded) return;
+            
+            updateStatus("Loading AI components...");
+            updateProgress(10);
+            
+            try {
+                // Load only the necessary models
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models'),
+                    faceapi.nets.faceLandmark68TinyNet.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models')
+                ]);
+                
+                modelsLoaded = true;
+                updateStatus("Ready to scan");
+                updateProgress(100);
+                document.getElementById('scan-button').disabled = false;
+                
+                // Hide progress after a delay
+                setTimeout(() => {
+                    document.getElementById('progress-bar').style.width = '0%';
+                    document.getElementById('progress-bar').textContent = '0%';
+                }, 1000);
+                
+            } catch (error) {
+                updateStatus("Error loading models. Refresh page.");
+                console.error(error);
+            }
+        }
+        
+        // Start loading models immediately
+        loadModels();
+        
+        // Handle file upload
+        document.getElementById('selfie-upload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const img = document.getElementById('uploaded-image');
+            img.onload = function() {
+                img.style.display = 'block';
+                document.getElementById('scan-button').disabled = !modelsLoaded;
+            };
+            img.src = URL.createObjectURL(file);
+        });
+        
+        // Scan button handler
+        document.getElementById('scan-button').addEventListener('click', async function() {
+            if (!modelsLoaded) {
+                updateStatus("Still loading models...");
+                return;
+            }
+            
+            const img = document.getElementById('uploaded-image');
+            if (!img.src || img.style.display === 'none') {
+                updateStatus("Please upload an image first");
+                return;
+            }
+            
+            updateStatus("Analyzing face...");
+            document.getElementById('scan-button').disabled = true;
+            
+            // Simulate progress for better UX
+            simulateProgress();
+            
+            try {
+                // Use tiny model for faster detection
+                const detections = await faceapi.detectAllFaces(
+                    img, 
+                    new faceapi.TinyFaceDetectorOptions()
+                ).withFaceLandmarks(true); // Use tiny landmarks
+                
+                if (detections.length === 0) {
+                    updateStatus("No face detected. Try another photo.");
+                    return;
+                }
+                
+                // Draw results
+                const canvas = document.getElementById('overlay');
+                faceapi.matchDimensions(canvas, img);
+                faceapi.draw.drawFaceLandmarks(canvas, detections[0]);
+                
+                // Show results
+                showResults(detections[0].landmarks);
+                updateStatus("Analysis complete");
+                
+            } catch (error) {
+                updateStatus("Error during analysis");
+                console.error(error);
+            } finally {
+                document.getElementById('scan-button').disabled = false;
+            }
+        });
+        
+        function simulateProgress() {
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress >= 90) clearInterval(interval);
+                updateProgress(progress);
+            }, 200);
+        }
+        
+        function updateProgress(percent) {
+            const progressBar = document.getElementById('progress-bar');
+            progressBar.style.width = `${percent}%`;
+            progressBar.textContent = `${Math.round(percent)}%`;
+        }
+        
+        function updateStatus(text) {
+            document.getElementById('status-text').textContent = text;
+        }
+        
+        function showResults(landmarks) {
+            const resultsDiv = document.getElementById('results');
+            const featuresDiv = document.getElementById('feature-scores');
+            const recsDiv = document.getElementById('recommendations');
+            
+            // Generate mock results (replace with real analysis)
+            const jawScore = 70 + Math.floor(Math.random() * 30);
+            const browScore = 60 + Math.floor(Math.random() * 40);
+            const lipScore = 80 + Math.floor(Math.random() * 20);
+            
+            featuresDiv.innerHTML = `
+                <p><strong>Jawline Definition:</strong> ${jawScore}/100</p>
+                <p><strong>Eyebrow Symmetry:</strong> ${browScore}/100</p>
+                <p><strong>Lip Fullness:</strong> ${lipScore}/100</p>
+            `;
+            
+            recsDiv.innerHTML = `
+                <h4>Recommendations:</h4>
+                <ul>
+                    <li>Use jawline exerciser 10 minutes daily</li>
+                    <li>Shape eyebrows for better symmetry</li>
+                    <li>Apply lip balm with SPF protection</li>
+                </ul>
+                <h4>Recommended Products:</h4>
+                <p>• Alpha Jaw Trainer ($29.99)</p>
+                <p>• Brow Sculpt Gel ($14.99)</p>
+                <p>• Hydra-Lip Balm ($9.99)</p>
+            `;
+            
+            resultsDiv.style.display = 'block';
+        }
+        
+        // Windows XP theming
+        document.querySelector('.close-button').addEventListener('click', function() {
+            document.getElementById('main-window').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
